@@ -5,11 +5,18 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -36,7 +43,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    ToDoListAppUi("Android")
+                    ToDoListAppUi()
                 }
             }
         }
@@ -44,39 +51,53 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun ToDoListAppUi(name: String, modifier: Modifier = Modifier) {
+fun ToDoListAppUi(modifier: Modifier = Modifier) {
     Column(
         Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Button(onClick = { /*TODO*/ }) {
-            Text(
-                text = "Add Items",
-                fontSize = 18.sp
-            )
-        }
 
-        Spacer(modifier = Modifier.padding(18.dp))
+        EditableItem()
 
-        var text by remember { mutableStateOf(" ") }
-        TextField(
-            value = text,
-            onValueChange = { newText -> text = newText },
-            label = { Text(
-                text = "Enter text here",
-                fontSize = 18.sp) },
-        )
     }
 }
 
 @Composable
 fun EditableItem() {
-    var text by remember { mutableStateOf(" ") }
-    TextField(
-        value = text,
-        onValueChange = { newText -> text = newText }
-    )
+
+    var booleanState by remember { mutableStateOf(false) }
+    Button(onClick = { booleanState = true }) {
+        Text(
+            text = "Add Item",
+            fontSize = 18.sp
+        )
+    }
+
+    Spacer(modifier = Modifier.padding(18.dp))
+
+    Row {
+        if (booleanState) {
+            var text by remember { mutableStateOf(" ") }
+            TextField(
+                value = text,
+                onValueChange = { newText -> text = newText },
+                label = {
+                    Text(
+                        text = "Enter item name",
+                        fontSize = 18.sp
+                    )
+                },
+            )
+
+            Icon(
+                imageVector = Icons.Default.Done,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(40.dp)
+            )
+        }
+    }
 }
 
 @Preview(
@@ -87,6 +108,6 @@ fun EditableItem() {
 @Composable
 fun GreetingPreview() {
     ToDoListAppTheme {
-        ToDoListAppUi("Android")
+        ToDoListAppUi()
     }
 }
