@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,7 +15,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -54,7 +58,7 @@ class MainActivity : ComponentActivity() {
 fun ToDoListAppUi(modifier: Modifier = Modifier) {
     Column(
         Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
+        //verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
@@ -63,10 +67,11 @@ fun ToDoListAppUi(modifier: Modifier = Modifier) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditableItem() {
 
-    var booleanState by remember { mutableStateOf(false) }
+    var booleanState by remember { mutableStateOf(true) }
     Button(onClick = { booleanState = true }) {
         Text(
             text = "Add Item",
@@ -76,27 +81,27 @@ fun EditableItem() {
 
     Spacer(modifier = Modifier.padding(18.dp))
 
-    Row {
-        if (booleanState) {
-            var text by remember { mutableStateOf(" ") }
-            TextField(
-                value = text,
-                onValueChange = { newText -> text = newText },
-                label = {
-                    Text(
-                        text = "Enter item name",
-                        fontSize = 18.sp
-                    )
-                },
-            )
+//    Row {
+//        if (booleanState) {
+//            var text by remember { mutableStateOf(" ") }
+//            TextField(
+//                value = text,
+//                onValueChange = { newText -> text = newText },
+//                label = {
+//                    Text(
+//                        text = "Enter item name",
+//                        fontSize = 18.sp
+//                    )
+//                },
+//            )
+//        }
+//    }
 
-            Icon(
-                imageVector = Icons.Default.Done,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(40.dp)
-            )
-        }
+    Box {
+        AlertDialog(
+            onDismissRequest = { /*TODO*/ },
+            confirmButton = { /*TODO*/ }
+        )
     }
 }
 
