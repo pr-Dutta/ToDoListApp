@@ -100,7 +100,17 @@ fun EditableItem() {
     Box {
         AlertDialog(
             onDismissRequest = { /*TODO*/ },
-            confirmButton = { /*TODO*/ }
+            confirmButton = { /*TODO*/ },
+            text = { TextField(
+                value = "Hi",
+                onValueChange = {  },
+                label = {
+                    Text(
+                        text = "Enter item name",
+                        fontSize = 18.sp
+                    )
+                },
+            ) }
         )
     }
 }
