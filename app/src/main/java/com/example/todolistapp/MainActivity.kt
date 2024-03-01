@@ -81,37 +81,23 @@ fun EditableItem() {
 
     Spacer(modifier = Modifier.padding(18.dp))
 
-//    Row {
-//        if (booleanState) {
-//            var text by remember { mutableStateOf(" ") }
-//            TextField(
-//                value = text,
-//                onValueChange = { newText -> text = newText },
-//                label = {
-//                    Text(
-//                        text = "Enter item name",
-//                        fontSize = 18.sp
-//                    )
-//                },
-//            )
-//        }
-//    }
-
-    Box {
-        AlertDialog(
-            onDismissRequest = { /*TODO*/ },
-            confirmButton = { /*TODO*/ },
-            text = { TextField(
-                value = "Hi",
-                onValueChange = {  },
-                label = {
-                    Text(
-                        text = "Enter item name",
-                        fontSize = 18.sp
-                    )
-                },
-            ) }
-        )
+    if (booleanState) {
+        Box {
+            AlertDialog(
+                onDismissRequest = { booleanState = false },
+                confirmButton = { /*TODO*/ },
+                text = { TextField(
+                    value = "Hi",
+                    onValueChange = {  },
+                    label = {
+                        Text(
+                            text = "Enter item name",
+                            fontSize = 18.sp
+                        )
+                    },
+                ) }
+            )
+        }
     }
 }
 
