@@ -81,14 +81,17 @@ fun EditableItem() {
 
     Spacer(modifier = Modifier.padding(18.dp))
 
+    var itemName by remember { mutableStateOf("") }
     if (booleanState) {
         Box {
             AlertDialog(
                 onDismissRequest = { booleanState = false },
-                confirmButton = { /*TODO*/ },
+                confirmButton = { Text("Save") },
+                //dismissButton = { Text("Cancel") },
+                title = { Text("To-Do List Item") },
                 text = { TextField(
-                    value = "Hi",
-                    onValueChange = {  },
+                    value = itemName,
+                    onValueChange = { itemName = it },
                     label = {
                         Text(
                             text = "Enter item name",
