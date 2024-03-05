@@ -72,13 +72,19 @@ fun ToDoListAppUi(modifier: Modifier = Modifier) {
 @Composable
 fun EditableItem() {
 
-    var booleanState by remember { mutableStateOf(true) }
-    Button(onClick = { booleanState = true }) {
-        Text(
-            text = "Add Item",
-            fontSize = 18.sp
-        )
+    var booleanState by remember { mutableStateOf(false) }
+
+    Column {
+        Button(onClick = { booleanState = true }) {
+            Text(
+                text = "Add Item",
+                fontSize = 18.sp
+            )
+        }
+
+        // - Lazy column
     }
+
 
     Spacer(modifier = Modifier.padding(18.dp))
 
@@ -113,7 +119,7 @@ fun EditableItem() {
                             },
                         )
 
-                        
+
                         TextField(
                             value = itemQuantity,
                             onValueChange = { itemQuantity = it },
