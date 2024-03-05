@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -82,38 +83,49 @@ fun EditableItem() {
     Spacer(modifier = Modifier.padding(18.dp))
 
     var itemName by remember { mutableStateOf("") }
-    var itemQuantity by remember { mutableStateOf(0) }
+    var itemQuantity by remember { mutableStateOf("") }
     if (booleanState) {
         Box {
             AlertDialog(
                 onDismissRequest = { booleanState = false },
-                confirmButton = { Text("Save") },
-                //dismissButton = { Text("Cancel") },
+                confirmButton = {
+                    Button(
+                        onClick = { /*TODO*/ }) {
+                        Text(text = "Save")
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = { booleanState = false }) {
+                        Text(text = "Cancel")
+                    }
+                },
                 title = { Text("To-Do List Item") },
                 text = { Column {
-                    TextField(
-                        value = itemName,
-                        onValueChange = { itemName = it },
-                        label = {
-                            Text(
-                                text = "Enter item name",
-                                fontSize = 18.sp
-                            )
-                        },
-                    )
+                        TextField(
+                            value = itemName,
+                            onValueChange = { itemName = it },
+                            label = {
+                                Text(
+                                    text = "Enter item name",
+                                    fontSize = 18.sp
+                                )
+                            },
+                        )
 
-                    // ------------------ from here
-                    TextField(
-                        value = itemName,
-                        onValueChange = { itemName = it },
-                        label = {
-                            Text(
-                                text = "Enter item name",
-                                fontSize = 18.sp
-                            )
-                        },
-                    )
-                } }
+                        
+                        TextField(
+                            value = itemQuantity,
+                            onValueChange = { itemQuantity = it },
+                            label = {
+                                Text(
+                                    text = "Enter quantity",
+                                    fontSize = 18.sp
+                                )
+                            },
+                        )
+                    }
+                }
             )
         }
     }
