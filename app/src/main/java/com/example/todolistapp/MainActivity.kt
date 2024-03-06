@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
@@ -83,6 +85,15 @@ fun EditableItem() {
         }
 
         // - Lazy column
+
+        val itemNameList = listOf("Mouse", "Keyboard", "Tap")
+        val itemQuantityList = listOf(1, 2, 5)
+
+        LazyColumn {
+            items(itemNameList) { item ->
+                ListItem(text = item)
+            }
+        }
     }
 
 
@@ -136,6 +147,17 @@ fun EditableItem() {
         }
     }
 }
+
+
+@Composable
+fun ListItem(text: String) {
+    Text(
+        text = text,
+        fontSize = 24.sp,
+        modifier = Modifier.padding(8.dp)
+    )
+}
+
 
 @Preview(
     showBackground = true,
