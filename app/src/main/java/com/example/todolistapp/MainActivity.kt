@@ -91,7 +91,13 @@ fun EditableItem() {
 
         LazyColumn {
             items(itemNameList) { item ->
-                ListItem(text = item)
+                ListItem(name = item, quantity = "")
+            }
+        }
+
+        LazyColumn {
+            items(itemQuantityList) { item ->
+                ListItem(name = "", quantity = item.toString())
             }
         }
     }
@@ -150,12 +156,19 @@ fun EditableItem() {
 
 
 @Composable
-fun ListItem(text: String) {
-    Text(
-        text = text,
-        fontSize = 24.sp,
-        modifier = Modifier.padding(8.dp)
-    )
+fun ListItem(name: String, quantity: String) {
+    Row {
+        Text(
+            text = name,
+            fontSize = 24.sp,
+            modifier = Modifier.padding(8.dp)
+        )
+        Text(
+            text = quantity,
+            fontSize = 24.sp,
+            modifier = Modifier.padding(8.dp)
+        )
+    }
 }
 
 
