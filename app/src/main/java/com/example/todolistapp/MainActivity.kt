@@ -86,18 +86,24 @@ fun EditableItem() {
 
         // - Lazy column
 
-        val itemNameList = listOf("Mouse", "Keyboard", "Tap")
+        val itemNameList = listOf(
+            "Mouse" to 1,
+            "Keyboard" to 2,
+            "Tap" to 5
+        )
         val itemQuantityList = listOf(1, 2, 5)
 
+        // // need to understand well
         LazyColumn {
-            items(itemNameList) { item ->
-                ListItem(name = item, quantity = "")
+            items(itemNameList) { (item, quantity) ->
+                ListItem(name = item, quantity = quantity.toString())
             }
         }
 
+        // need to understand well
         LazyColumn {
             items(itemQuantityList) { item ->
-                ListItem(name = "", quantity = item.toString())
+                ListItem(name = "", quantity = "")
             }
         }
     }
