@@ -70,11 +70,13 @@ fun EditableItem() {
     var itemName by remember { mutableStateOf("") }
     var itemQuantity by remember { mutableStateOf("") }
 
-    val itemList by remember {
-        mutableStateOf(ToDoItem("Mouse", "1"))
-    }
+    // Important to understand
+    var itemList by remember { mutableStateOf(listOf<ToDoItem>()) }
 
-    var itemNameList = mutableListOf<ToDoItem>()
+    // We did not remember the previous list that's why it did not work
+    //var itemNameList = mutableListOf<ToDoItem>()
+
+
 
     Column {
         Button(onClick = { booleanState = true }) {
@@ -87,7 +89,7 @@ fun EditableItem() {
         // - Lazy column
 
         LazyColumn {
-            items(itemNameList) { (item, quantity) ->
+            items(itemList) { (item, quantity) ->
                 ListItem(name = item, quantity = quantity.toString())
             }
         }
@@ -104,9 +106,10 @@ fun EditableItem() {
                 confirmButton = {
                     Button(
                         onClick = {
-                            itemNameList.add(ToDoItem(itemName , itemQuantity))
+                            // Have to understand
+                            val newItem = ToDoItem(itemName, itemQuantity)
+                            itemList = itemList + newItem
                             booleanState = false
-                            println(itemNameList)
                         }) {
                         Text(text = "Save")
                     }
