@@ -11,9 +11,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -47,7 +51,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-data class ToDoItem(val name: String, val quantity: String)
+data class ToDoItem(var name: String, var quantity: String)
 
 @Composable
 fun ToDoListAppUi(modifier: Modifier = Modifier) {
@@ -89,8 +93,12 @@ fun EditableItem() {
         // - Lazy column
 
         LazyColumn {
-            items(itemList) { (item, quantity) ->
-                ListItem(name = item, quantity = quantity.toString())
+            items(itemList) { (name, quantity) ->
+                var tempItem: ToDoItem = ToDoItem("", "")
+                itemList.forEach {
+                    tempItem = it
+                }
+                ListItem(item = tempItem, name = name, quantity = quantity)
             }
         }
     }
@@ -153,7 +161,7 @@ fun EditableItem() {
 
 
 @Composable
-fun ListItem(name: String, quantity: String) {
+fun ListItem(item: ToDoItem, name: String, quantity: String) {
     Row {
         Text(
             text = name,
@@ -165,9 +173,48 @@ fun ListItem(name: String, quantity: String) {
             fontSize = 24.sp,
             modifier = Modifier.padding(8.dp)
         )
+
+
+        // I need to use lambda function here
+
+        IconButton(onClick = { //editItem(item) //
+                    }) {
+            Icon(
+                imageVector = Icons.Default.Edit,
+                contentDescription = "Edit"
+            )
+        }
     }
 }
 
+
+@Composable
+fun editItem(item: ToDoItem) {
+    Column {
+        TextField(
+            value = item.name,
+            onValueChange = { item.name = it },
+            label = {
+                Text(
+                    text = "Enter item name",
+                    fontSize = 18.sp
+                )
+            },
+        )
+
+
+        TextField(
+            value = item.quantity,
+            onValueChange = { item.quantity = it },
+            label = {
+                Text(
+                    text = "Enter quantity",
+                    fontSize = 18.sp
+                )
+            },
+        )
+    }
+}
 
 @Preview(
     showBackground = true,
