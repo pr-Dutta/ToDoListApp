@@ -1,5 +1,6 @@
 package com.example.todolistapp
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,6 +24,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,7 +58,7 @@ data class ToDoItem(var name: String, var quantity: String)
 @Composable
 fun ToDoListAppUi(modifier: Modifier = Modifier) {
     Column(
-        Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         //verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -94,7 +96,7 @@ fun EditableItem() {
 
         LazyColumn {
             items(itemList) { (name, quantity) ->
-                var tempItem: ToDoItem = ToDoItem("", "")
+                var tempItem = ToDoItem("", "")
                 itemList.forEach {
                     tempItem = it
                 }
@@ -160,16 +162,19 @@ fun EditableItem() {
 }
 
 
+@SuppressLint("UnrememberedMutableState")
 @Composable
 fun ListItem(item: ToDoItem, name: String, quantity: String) {
+
+    val isEditing = remember { mutableStateOf(false) }
     Row {
         Text(
-            text = name,
+            text = item.name,
             fontSize = 24.sp,
             modifier = Modifier.padding(8.dp)
         )
         Text(
-            text = quantity,
+            text = item.quantity,
             fontSize = 24.sp,
             modifier = Modifier.padding(8.dp)
         )
@@ -177,23 +182,47 @@ fun ListItem(item: ToDoItem, name: String, quantity: String) {
 
         // I need to use lambda function here
 
-        IconButton(onClick = { //editItem(item) //
-                    }) {
+
+        IconButton(onClick = { isEditing.value = true }) {
             Icon(
                 imageVector = Icons.Default.Edit,
                 contentDescription = "Edit"
             )
         }
+
+    }
+
+    if (isEditing.value) {
+        ToDoItemEditor(item,
+            onEditComplete = {
+                    name, quantity ->
+
+                item.name = name
+                item.quantity = quantity
+            },
+            isEditing = isEditing
+        )
     }
 }
 
 
 @Composable
-fun editItem(item: ToDoItem) {
-    Column {
+fun ToDoItemEditor(
+    item: ToDoItem,
+    onEditComplete: (String, String) -> Unit,
+    isEditing: MutableState<Boolean>
+    ) {
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        var editableName by remember { mutableStateOf(item.name) }
+        var editableQuantity by remember { mutableStateOf(item.quantity) }
+
         TextField(
-            value = item.name,
-            onValueChange = { item.name = it },
+            value = editableName,
+            onValueChange = { editableName = it },
             label = {
                 Text(
                     text = "Enter item name",
@@ -204,8 +233,8 @@ fun editItem(item: ToDoItem) {
 
 
         TextField(
-            value = item.quantity,
-            onValueChange = { item.quantity = it },
+            value = editableQuantity,
+            onValueChange = { editableQuantity = it },
             label = {
                 Text(
                     text = "Enter quantity",
@@ -213,6 +242,13 @@ fun editItem(item: ToDoItem) {
                 )
             },
         )
+
+        Button(onClick = {
+            onEditComplete(editableName, editableQuantity)
+            isEditing.value = false
+        }) {
+            Text(text = "Save")
+        }
     }
 }
 
