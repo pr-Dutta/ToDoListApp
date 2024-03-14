@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,6 +21,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -53,7 +55,11 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-data class ToDoItem(var name: String, var quantity: String)
+data class ToDoItem(
+    var name: String,
+    var quantity: String,
+    var isEditing: MutableState<Boolean> = mutableStateOf(false)
+)
 
 @Composable
 fun ToDoListAppUi(modifier: Modifier = Modifier) {
@@ -79,7 +85,8 @@ fun EditableItem() {
     var itemList by remember { mutableStateOf(listOf<ToDoItem>()) }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize()
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(onClick = { booleanState = true }) {
@@ -93,9 +100,24 @@ fun EditableItem() {
         LazyColumn {
             items(itemList) { item ->        // Important
 
-                ListItem(
-                    item = item,
-                    onDeleteComplete = { itemList = itemList - item })
+                if (item.isEditing.value) {
+                    ToDoItemEditor(
+                        item,
+
+                        // definition
+                        onEditComplete = {
+                                name, quantity ->
+
+                            item.name = name
+                            item.quantity = quantity
+                        },
+                    )
+                }else {
+                    ListItem(
+                        item = item,
+                        onDeleteComplete = { itemList = itemList - item }
+                    )
+                }
             }
         }
     }
@@ -164,7 +186,6 @@ fun ListItem(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        val isEditing = remember { mutableStateOf(false) }
 
         Row {
             Text(
@@ -187,27 +208,15 @@ fun ListItem(
                 )
             }
 
-            IconButton(onClick = { isEditing.value = true }) {
+            IconButton(onClick = {
+                //isEditing.value = true
+                item.isEditing.value = true
+            }) {
                 Icon(
                     imageVector = Icons.Default.Edit,
                     contentDescription = "Edit"
                 )
             }
-        }
-
-        if (isEditing.value) {
-            ToDoItemEditor(
-                item,
-
-                // definition
-                onEditComplete = {
-                        name, quantity ->
-
-                    item.name = name
-                    item.quantity = quantity
-                },
-                isEditing = isEditing
-            )
         }
     }
 }
@@ -218,7 +227,6 @@ fun ToDoItemEditor(
 
     // declaration
     onEditComplete: (String, String) -> Unit,
-    isEditing: MutableState<Boolean>
     ) {
 
     Column(
@@ -228,33 +236,28 @@ fun ToDoItemEditor(
         var editableName by remember { mutableStateOf(item.name) }
         var editableQuantity by remember { mutableStateOf(item.quantity) }
 
-        TextField(
-            value = editableName,
-            onValueChange = { editableName = it },
-            label = {
-                Text(
-                    text = "Enter item name",
-                    fontSize = 18.sp
-                )
-            },
-        )
 
-        TextField(
-            value = editableQuantity,
-            onValueChange = { editableQuantity = it },
-            label = {
-                Text(
-                    text = "Enter quantity",
-                    fontSize = 18.sp
-                )
-            },
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            OutlinedTextField(
+                value = editableName,
+                onValueChange = { editableName = it },
+                modifier = Modifier.weight(1f)
+            )
+
+            OutlinedTextField(
+                value = editableQuantity,
+                onValueChange = { editableQuantity = it },
+                modifier = Modifier.weight(1f)
+            )
+        }
 
         Button(onClick = {
 
             // calling
             onEditComplete(editableName, editableQuantity)
-            isEditing.value = false
+            item.isEditing.value = false
         }) {
             Text(text = "Save")
         }
