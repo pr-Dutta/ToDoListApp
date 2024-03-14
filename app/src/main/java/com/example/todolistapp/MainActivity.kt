@@ -13,10 +13,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -59,7 +59,6 @@ data class ToDoItem(var name: String, var quantity: String)
 fun ToDoListAppUi(modifier: Modifier = Modifier) {
     Column(
         modifier = Modifier.fillMaxSize(),
-        //verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
@@ -68,7 +67,7 @@ fun ToDoListAppUi(modifier: Modifier = Modifier) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun EditableItem() {
 
@@ -77,12 +76,7 @@ fun EditableItem() {
     var itemQuantity by remember { mutableStateOf("") }
 
     // Important to understand
-    var itemList by remember { mutableStateOf(listOf<ToDoItem>()) }
-
-    // We did not remember the previous list that's why it did not work
-    //var itemNameList = mutableListOf<ToDoItem>()
-
-
+    var itemList = remember { mutableStateOf(listOf<ToDoItem>()) }
 
     Column {
         Button(onClick = { booleanState = true }) {
@@ -93,22 +87,22 @@ fun EditableItem() {
         }
 
         // - Lazy column
-
         LazyColumn {
-            items(itemList) { (name, quantity) ->
+            items(itemList.value) { (name, quantity) ->
                 var tempItem = ToDoItem("", "")
-                itemList.forEach {
+                itemList.value.forEach {
                     tempItem = it
                 }
-                ListItem(item = tempItem, name = name, quantity = quantity)
+                ListItem(
+                    item = tempItem,
+                    onDeleteComplete = { name, quantity ->
+                        itemList.value - ToDoItem(name , quantity)
+                })
             }
         }
     }
 
-
     Spacer(modifier = Modifier.padding(18.dp))
-
-
     if (booleanState) {
         Box {
             AlertDialog(
@@ -118,7 +112,7 @@ fun EditableItem() {
                         onClick = {
                             // Have to understand
                             val newItem = ToDoItem(itemName, itemQuantity)
-                            itemList = itemList + newItem
+                            itemList.value = itemList.value + newItem
                             booleanState = false
                         }) {
                         Text(text = "Save")
@@ -143,7 +137,6 @@ fun EditableItem() {
                             },
                         )
 
-
                         TextField(
                             value = itemQuantity,
                             onValueChange = { itemQuantity = it },
@@ -161,12 +154,15 @@ fun EditableItem() {
     }
 }
 
-
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun ListItem(item: ToDoItem, name: String, quantity: String) {
+fun ListItem(
+    item: ToDoItem,
+    onDeleteComplete: (String, String) -> Unit
+) {
 
     val isEditing = remember { mutableStateOf(false) }
+
     Row {
         Text(
             text = item.name,
@@ -179,9 +175,14 @@ fun ListItem(item: ToDoItem, name: String, quantity: String) {
             modifier = Modifier.padding(8.dp)
         )
 
-
         // I need to use lambda function here
 
+        IconButton(onClick = { onDeleteComplete(item.name, item.quantity) }) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Edit"
+            )
+        }
 
         IconButton(onClick = { isEditing.value = true }) {
             Icon(
@@ -189,11 +190,13 @@ fun ListItem(item: ToDoItem, name: String, quantity: String) {
                 contentDescription = "Edit"
             )
         }
-
     }
 
     if (isEditing.value) {
-        ToDoItemEditor(item,
+        ToDoItemEditor(
+            item,
+
+            // definition
             onEditComplete = {
                     name, quantity ->
 
@@ -205,10 +208,11 @@ fun ListItem(item: ToDoItem, name: String, quantity: String) {
     }
 }
 
-
 @Composable
 fun ToDoItemEditor(
     item: ToDoItem,
+
+    // declaration
     onEditComplete: (String, String) -> Unit,
     isEditing: MutableState<Boolean>
     ) {
@@ -231,7 +235,6 @@ fun ToDoItemEditor(
             },
         )
 
-
         TextField(
             value = editableQuantity,
             onValueChange = { editableQuantity = it },
@@ -244,6 +247,8 @@ fun ToDoItemEditor(
         )
 
         Button(onClick = {
+
+            // calling
             onEditComplete(editableName, editableQuantity)
             isEditing.value = false
         }) {
