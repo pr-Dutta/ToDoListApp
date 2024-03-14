@@ -76,9 +76,12 @@ fun EditableItem() {
     var itemQuantity by remember { mutableStateOf("") }
 
     // Important to understand
-    var itemList = remember { mutableStateOf(listOf<ToDoItem>()) }
+    var itemList by remember { mutableStateOf(listOf<ToDoItem>()) }
 
-    Column {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Button(onClick = { booleanState = true }) {
             Text(
                 text = "Add Item",
@@ -88,16 +91,11 @@ fun EditableItem() {
 
         // - Lazy column
         LazyColumn {
-            items(itemList.value) { (name, quantity) ->
-                var tempItem = ToDoItem("", "")
-                itemList.value.forEach {
-                    tempItem = it
-                }
+            items(itemList) { item ->        // Important
+
                 ListItem(
-                    item = tempItem,
-                    onDeleteComplete = { name, quantity ->
-                        itemList.value - ToDoItem(name , quantity)
-                })
+                    item = item,
+                    onDeleteComplete = { itemList = itemList - item })
             }
         }
     }
@@ -112,7 +110,7 @@ fun EditableItem() {
                         onClick = {
                             // Have to understand
                             val newItem = ToDoItem(itemName, itemQuantity)
-                            itemList.value = itemList.value + newItem
+                            itemList = itemList + newItem
                             booleanState = false
                         }) {
                         Text(text = "Save")
@@ -158,53 +156,59 @@ fun EditableItem() {
 @Composable
 fun ListItem(
     item: ToDoItem,
-    onDeleteComplete: (String, String) -> Unit
+    onDeleteComplete: () -> Unit
 ) {
 
-    val isEditing = remember { mutableStateOf(false) }
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
 
-    Row {
-        Text(
-            text = item.name,
-            fontSize = 24.sp,
-            modifier = Modifier.padding(8.dp)
-        )
-        Text(
-            text = item.quantity,
-            fontSize = 24.sp,
-            modifier = Modifier.padding(8.dp)
-        )
+        val isEditing = remember { mutableStateOf(false) }
 
-        // I need to use lambda function here
-
-        IconButton(onClick = { onDeleteComplete(item.name, item.quantity) }) {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = "Edit"
+        Row {
+            Text(
+                text = item.name,
+                fontSize = 24.sp,
+                modifier = Modifier.padding(8.dp)
             )
+            Text(
+                text = item.quantity,
+                fontSize = 24.sp,
+                modifier = Modifier.padding(8.dp)
+            )
+
+            // I need to use lambda function here
+
+            IconButton(onClick = { onDeleteComplete() }) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Edit"
+                )
+            }
+
+            IconButton(onClick = { isEditing.value = true }) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit"
+                )
+            }
         }
 
-        IconButton(onClick = { isEditing.value = true }) {
-            Icon(
-                imageVector = Icons.Default.Edit,
-                contentDescription = "Edit"
+        if (isEditing.value) {
+            ToDoItemEditor(
+                item,
+
+                // definition
+                onEditComplete = {
+                        name, quantity ->
+
+                    item.name = name
+                    item.quantity = quantity
+                },
+                isEditing = isEditing
             )
         }
-    }
-
-    if (isEditing.value) {
-        ToDoItemEditor(
-            item,
-
-            // definition
-            onEditComplete = {
-                    name, quantity ->
-
-                item.name = name
-                item.quantity = quantity
-            },
-            isEditing = isEditing
-        )
     }
 }
 
