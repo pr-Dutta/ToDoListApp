@@ -71,10 +71,6 @@ fun ToDoListApp(
             }
         }
 
-        dateList.forEach {
-            println("Date - - - - $it")
-        }
-
         if (showDialog.value) {
             AddItem(showDialog, sharedPreferences, viewModel, dateList)
         }
@@ -191,12 +187,13 @@ fun DisplayTask(
             )
 
             Row(modifier = Modifier.padding(8.dp)) {
-                IconButton(onClick = { println("--------------hahah") } ) {
+                IconButton(onClick = {
+
+                } ) {
                     Icon(imageVector = Icons.Default.Edit, contentDescription = null)
                 }
                 IconButton(onClick = {
-                    val result = viewModel.removeTask(dateList, sharedPreferences, task)
-                    println("$result-----------hahah")
+                    viewModel.removeTask(dateList, sharedPreferences, task)
                 }) {
                     Icon(imageVector = Icons.Default.Delete, contentDescription = null)
                 }

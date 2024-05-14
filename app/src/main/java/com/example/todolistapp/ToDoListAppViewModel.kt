@@ -28,23 +28,16 @@ class ToDoListAppViewModel() : ViewModel() {
         dateList: MutableList<String>,
         sharedPref: SharedPreferences,
         task: String
-    ) : String {
+    ) {
 
         val key = getKeyToRemoveTask(dateList, sharedPref, task)
 
-        val taskName = getTask(sharedPref, key)
-        print("$key -- $ $taskName")
-        print("-------------------------------- haha")
-
-        // remove nahe ho raha ha
         val editor = sharedPref.edit()
         editor.apply {
             editor.remove(key)
             editor.apply()
-            println("remove done")
         }
         dateList.remove(key)
-        return "Done"
     }
 
     fun getTaskList(sharedPref: SharedPreferences, dateList: MutableList<String>): MutableList<String> {
