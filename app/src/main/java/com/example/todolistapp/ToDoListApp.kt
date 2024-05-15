@@ -1,5 +1,6 @@
 package com.example.todolistapp
 
+import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
@@ -14,7 +15,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -41,7 +44,8 @@ fun ToDoListApp(
     viewModel: ToDoListAppViewModel,
 ) {
     var dateList = remember { mutableStateListOf<String>() }
-
+    var taskName = remember { mutableStateOf("") }
+    val isEditing = remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -72,10 +76,10 @@ fun ToDoListApp(
         }
 
         if (showDialog.value) {
-            AddItem(showDialog, sharedPreferences, viewModel, dateList)
+            AddItem(showDialog, sharedPreferences, viewModel, dateList, taskName, isEditing)
         }
 
-        ShowToDo(viewModel, sharedPreferences, dateList)
+        ShowToDo(viewModel, sharedPreferences, dateList, taskName, isEditing)
 
     }
 }
@@ -86,9 +90,9 @@ fun AddItem(
     sharedPreferences: SharedPreferences,
     viewModel: ToDoListAppViewModel,
     dateList: MutableList<String>,
+    taskName: MutableState<String>,
+    isEditing: MutableState<Boolean>
 ) {
-
-    var taskName = remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -108,8 +112,10 @@ fun AddItem(
                     ) {
                         Button(onClick = {
                             // need to handel exception
-                            viewModel.addTask(sharedPreferences, taskName.value, dateList)
+                            println("Before")
+                            viewModel.addTask(sharedPreferences, taskName.value, dateList, isEditing.value)
                             showDialog.value = false
+                            println("After")
                         }) {
                             Text(text = "Add")
                         }
@@ -137,24 +143,38 @@ fun AddItem(
     }
 }
 
+@SuppressLint("UnrememberedMutableState")
 @Composable
 fun ShowToDo(
     viewModel: ToDoListAppViewModel,
     sharedPreferences: SharedPreferences,
-    dateList: MutableList<String>
+    dateList: MutableList<String>,
+    taskName: MutableState<String>,
+    isEditing: MutableState<Boolean>
 ) {
 
-    val taskList = viewModel.getTaskList(sharedPreferences, dateList)
+    var taskList = mutableStateOf(viewModel.getTaskList(sharedPreferences, dateList))
+
 
     LazyColumn {
-        items(taskList) {
+        items(taskList.value) {
             task ->
-            DisplayTask(
-                viewModel,
-                dateList,
-                sharedPreferences,
-                task
-            )
+
+            // get task isEditing
+            val isEditingValue = viewModel.getIsEditingValue(sharedPreferences, task)
+            isEditing.value = isEditingValue
+
+            if (isEditing.value) {
+                EditTask(viewModel, sharedPreferences, dateList, taskList.value, taskName, task, isEditing)
+            }else {
+                DisplayTask(
+                    viewModel,
+                    dateList,
+                    isEditing,
+                    sharedPreferences,
+                    task
+                )
+            }
         }
     }
 }
@@ -163,9 +183,12 @@ fun ShowToDo(
 fun DisplayTask(
     viewModel: ToDoListAppViewModel,
     dateList: MutableList<String>,
+    isEditing: MutableState<Boolean>,
     sharedPreferences: SharedPreferences,
-    task: String,
+    task: String
 ) {
+
+    var isEditingBoolean : Boolean
 
     Column(
         modifier = Modifier
@@ -188,14 +211,86 @@ fun DisplayTask(
 
             Row(modifier = Modifier.padding(8.dp)) {
                 IconButton(onClick = {
-
-                } ) {
+                    isEditingBoolean = true
+                    isEditing.value = isEditingBoolean
+                    viewModel.removeIsEditing(sharedPreferences, task)
+                    viewModel.addIsEditing(sharedPreferences, task, isEditingBoolean)
+                }) {
                     Icon(imageVector = Icons.Default.Edit, contentDescription = null)
                 }
                 IconButton(onClick = {
                     viewModel.removeTask(dateList, sharedPreferences, task)
                 }) {
                     Icon(imageVector = Icons.Default.Delete, contentDescription = null)
+                }
+            }
+
+        }
+    }
+}
+
+@Composable
+fun EditTask(
+    viewModel: ToDoListAppViewModel,
+    sharedPreferences: SharedPreferences,
+    dateList: MutableList<String>,
+    taskList: MutableList<String>,
+    taskName: MutableState<String>,
+    task: String,
+    isEditing: MutableState<Boolean>
+) {
+
+    val previousTaskName = taskName.value
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .border(
+                border = BorderStroke(2.dp, Color(0XFF018786)),
+                shape = RoundedCornerShape(20)
+            ),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row {
+
+            OutlinedTextField(
+                value = taskName.value,
+                onValueChange = { taskName.value = it },
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                    .weight(1f)
+            )
+
+            Row(modifier = Modifier
+                .padding(8.dp)
+                .weight(1f)
+            ) {
+                IconButton(onClick = {
+                    isEditing.value = false
+                    viewModel.removeIsEditing(sharedPreferences, task)
+                    viewModel.addIsEditing(sharedPreferences, task, isEditing.value)
+
+                    viewModel.addTask(sharedPreferences, taskName.value, dateList, isEditing.value)
+                    viewModel.removeTask(dateList, sharedPreferences, previousTaskName)
+
+                    
+                    //------------------------------------------------------------------------
+                    viewModel.getTaskList(sharedPreferences, dateList).toList().forEach {
+                        taskList.add(it)
+                    }
+
+                }) {
+                    Icon(imageVector = Icons.Default.Done, contentDescription = null)
+                }
+                IconButton(onClick = {
+                    isEditing.value = false
+                    viewModel.removeIsEditing(sharedPreferences, task)
+                    viewModel.addIsEditing(sharedPreferences, task, isEditing.value)
+                }) {
+                    Icon(imageVector = Icons.Default.Close, contentDescription = null)
                 }
             }
 

@@ -11,15 +11,32 @@ class ToDoListAppViewModel() : ViewModel() {
     fun addTask(
         sharedPref: SharedPreferences,
         taskName: String,
-        dateList: MutableList<String>
+        dateList: MutableList<String>,
+        isEditing: Boolean
     ) {
 
+        println("Before addTask")
         val date = getCurrentDateAndTime()
         dateList.add(date)
 
         val editor = sharedPref.edit()
         editor.apply {
             editor.putString(date, taskName)
+            editor.putBoolean(taskName, isEditing)
+            editor.apply()
+        }
+        println("After addTask")
+    }
+
+    fun addIsEditing(
+        sharedPref: SharedPreferences,
+        taskName: String,
+        isEditing: Boolean
+    ) {
+
+        val editor = sharedPref.edit()
+        editor.apply {
+            editor.putBoolean(taskName, isEditing)
             editor.apply()
         }
     }
@@ -30,7 +47,7 @@ class ToDoListAppViewModel() : ViewModel() {
         task: String
     ) {
 
-        val key = getKeyToRemoveTask(dateList, sharedPref, task)
+        val key = getKeyToRemoveAndEditTask(dateList, sharedPref, task)
 
         val editor = sharedPref.edit()
         editor.apply {
@@ -38,6 +55,18 @@ class ToDoListAppViewModel() : ViewModel() {
             editor.apply()
         }
         dateList.remove(key)
+    }
+
+    fun removeIsEditing(
+        sharedPref: SharedPreferences,
+        key: String
+    ) {
+
+        val editor = sharedPref.edit()
+        editor.apply {
+            editor.remove(key)
+            editor.apply()
+        }
     }
 
     fun getTaskList(sharedPref: SharedPreferences, dateList: MutableList<String>): MutableList<String> {
@@ -58,7 +87,7 @@ class ToDoListAppViewModel() : ViewModel() {
         return currentDate
     }
 
-    fun getKeyToRemoveTask(
+    fun getKeyToRemoveAndEditTask(
         dateList: MutableList<String>,
         sharedPreferences: SharedPreferences,
         task: String
@@ -76,8 +105,27 @@ class ToDoListAppViewModel() : ViewModel() {
         return key
     }
 
-    fun getTask(sharedPref: SharedPreferences, key: String?) : String? {
-        val task = sharedPref.getString(key.toString(), null)
-        return task
+    fun editTask(
+        sharedPref: SharedPreferences,
+        taskName: String,
+        dateList: MutableList<String>
+    ) {
+        val editor = sharedPref.edit()
+
+        val date = getCurrentDateAndTime()
+        dateList.add(date)
+
+        editor.apply {
+            editor.putString(date, taskName)
+            editor.apply()
+        }
+    }
+
+    fun getIsEditingValue(
+        sharedPref: SharedPreferences,
+        task: String
+    ) : Boolean {
+        val key = sharedPref.getBoolean(task, false)
+        return key
     }
 }
