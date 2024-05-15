@@ -27,9 +27,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,8 +42,10 @@ import com.example.todolistapp.ui.theme.ToDoListAppTheme
 fun ToDoListApp(
     sharedPreferences: SharedPreferences,
     viewModel: ToDoListAppViewModel,
+    dateList: SnapshotStateList<String>,
 ) {
-    var dateList = remember { mutableStateListOf<String>() }
+
+
     var taskName = remember { mutableStateOf("") }
     val isEditing = remember { mutableStateOf(false) }
 
@@ -76,10 +78,12 @@ fun ToDoListApp(
         }
 
         if (showDialog.value) {
-            AddItem(showDialog, sharedPreferences, viewModel, dateList, taskName, isEditing)
+            AddItem(showDialog, sharedPreferences, viewModel, dateList, taskName)
         }
 
+
         ShowToDo(viewModel, sharedPreferences, dateList, taskName, isEditing)
+
 
     }
 }
@@ -90,14 +94,12 @@ fun AddItem(
     sharedPreferences: SharedPreferences,
     viewModel: ToDoListAppViewModel,
     dateList: MutableList<String>,
-    taskName: MutableState<String>,
-    isEditing: MutableState<Boolean>
+    taskName: MutableState<String>
 ) {
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            //.padding(16.dp)
     ) {
 
         if (showDialog.value) {
@@ -113,7 +115,7 @@ fun AddItem(
                         Button(onClick = {
                             // need to handel exception
                             println("Before")
-                            viewModel.addTask(sharedPreferences, taskName.value, dateList, isEditing.value)
+                            viewModel.addTask(sharedPreferences, taskName.value, dateList)
                             showDialog.value = false
                             println("After")
                         }) {
@@ -152,7 +154,6 @@ fun ShowToDo(
     taskName: MutableState<String>,
     isEditing: MutableState<Boolean>
 ) {
-
     var taskList = mutableStateOf(viewModel.getTaskList(sharedPreferences, dateList))
 
 
@@ -160,20 +161,21 @@ fun ShowToDo(
         items(taskList.value) {
             task ->
 
-            // get task isEditing
             val isEditingValue = viewModel.getIsEditingValue(sharedPreferences, task)
-            isEditing.value = isEditingValue
 
-            if (isEditing.value) {
-                EditTask(viewModel, sharedPreferences, dateList, taskList.value, taskName, task, isEditing)
+            if (isEditing.value && isEditingValue) {
+                taskName.value = task
+                EditTask(viewModel, sharedPreferences, dateList, taskName, task, isEditing)
             }else {
-                DisplayTask(
-                    viewModel,
-                    dateList,
-                    isEditing,
-                    sharedPreferences,
-                    task
-                )
+                if (task != null ) {
+                    DisplayTask(
+                        viewModel,
+                        dateList,
+                        isEditing,
+                        sharedPreferences,
+                        task
+                    )
+                }
             }
         }
     }
@@ -198,7 +200,8 @@ fun DisplayTask(
                 border = BorderStroke(2.dp, Color(0XFF018786)),
                 shape = RoundedCornerShape(20)
             ),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Row {
 
@@ -234,13 +237,10 @@ fun EditTask(
     viewModel: ToDoListAppViewModel,
     sharedPreferences: SharedPreferences,
     dateList: MutableList<String>,
-    taskList: MutableList<String>,
     taskName: MutableState<String>,
     task: String,
     isEditing: MutableState<Boolean>
 ) {
-
-    val previousTaskName = taskName.value
 
     Column(
         modifier = Modifier
@@ -269,18 +269,13 @@ fun EditTask(
                 .weight(1f)
             ) {
                 IconButton(onClick = {
+                    viewModel.removeTask(dateList, sharedPreferences, task)
+
                     isEditing.value = false
                     viewModel.removeIsEditing(sharedPreferences, task)
                     viewModel.addIsEditing(sharedPreferences, task, isEditing.value)
 
-                    viewModel.addTask(sharedPreferences, taskName.value, dateList, isEditing.value)
-                    viewModel.removeTask(dateList, sharedPreferences, previousTaskName)
-
-                    
-                    //------------------------------------------------------------------------
-                    viewModel.getTaskList(sharedPreferences, dateList).toList().forEach {
-                        taskList.add(it)
-                    }
+                    viewModel.addTask(sharedPreferences, taskName.value, dateList)
 
                 }) {
                     Icon(imageVector = Icons.Default.Done, contentDescription = null)
@@ -295,13 +290,5 @@ fun EditTask(
             }
 
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ToDoListAppPreview() {
-    ToDoListAppTheme {
-        //ToDoListApp()
     }
 }

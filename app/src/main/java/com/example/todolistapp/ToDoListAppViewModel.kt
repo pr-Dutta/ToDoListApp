@@ -12,20 +12,26 @@ class ToDoListAppViewModel() : ViewModel() {
         sharedPref: SharedPreferences,
         taskName: String,
         dateList: MutableList<String>,
-        isEditing: Boolean
+        isEditing: Boolean = false
     ) {
 
         println("Before addTask")
         val date = getCurrentDateAndTime()
         dateList.add(date)
 
+
         val editor = sharedPref.edit()
         editor.apply {
             editor.putString(date, taskName)
             editor.putBoolean(taskName, isEditing)
+            editor.putStringSet("dateList", dateList.toMutableSet())
             editor.apply()
         }
         println("After addTask")
+    }
+
+    fun getDateList(sharedPref: SharedPreferences) : List<String>? {
+        return  sharedPref.getStringSet("dateList", null)?.toList()
     }
 
     fun addIsEditing(
@@ -69,7 +75,7 @@ class ToDoListAppViewModel() : ViewModel() {
         }
     }
 
-    fun getTaskList(sharedPref: SharedPreferences, dateList: MutableList<String>): MutableList<String> {
+    fun getTaskList(sharedPref: SharedPreferences, dateList: MutableList<String>): List<String> {
 
         val list = mutableListOf<String>()
 
@@ -77,7 +83,7 @@ class ToDoListAppViewModel() : ViewModel() {
             val task = sharedPref.getString(it, null)
             list.add(task.toString())
         }
-        return list
+        return list.toList()
     }
 
 
@@ -103,22 +109,6 @@ class ToDoListAppViewModel() : ViewModel() {
             }
         }
         return key
-    }
-
-    fun editTask(
-        sharedPref: SharedPreferences,
-        taskName: String,
-        dateList: MutableList<String>
-    ) {
-        val editor = sharedPref.edit()
-
-        val date = getCurrentDateAndTime()
-        dateList.add(date)
-
-        editor.apply {
-            editor.putString(date, taskName)
-            editor.apply()
-        }
     }
 
     fun getIsEditingValue(
