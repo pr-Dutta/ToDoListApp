@@ -35,8 +35,6 @@ class MainActivity : ComponentActivity() {
                     ToDoListApp(sharedPref, viewModel, dateList)
                 }
             }
-
-
         }
     }
 }
