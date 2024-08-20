@@ -50,8 +50,8 @@ fun ToDoListApp(
 ) {
 
 
-//    var taskName = remember { mutableStateOf("") }
-//    val isEditing = remember { mutableStateOf(false) }
+    var taskName = remember { mutableStateOf("") }
+    val isEditing = remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
